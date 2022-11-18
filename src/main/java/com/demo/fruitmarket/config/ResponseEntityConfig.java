@@ -3,7 +3,9 @@ package com.demo.fruitmarket.config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -48,19 +50,21 @@ public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
             final ServerHttpRequest serverHttpRequest,
             final ServerHttpResponse serverHttpResponse
     ) {
-//        if (body instanceof String) {
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            try {
-//                return objectMapper.writeValueAsString(new CommonResult<>(200, "", body));
-//            } catch (JsonProcessingException e) {
-//                return "不預期的意外！";
-//            }
-//        }
-        return new CommonResult("9487", "預設回傳", body);
+        System.out.println("body = " + body + ", methodParameter = " + methodParameter + ", mediaType = " + mediaType + ", aClass = " + aClass + ", serverHttpRequest = " + serverHttpRequest + ", serverHttpResponse = " + serverHttpResponse);
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            //TODO 整理一下回傳代碼
+            String result = objectMapper.writeValueAsString(body);
+            System.out.println("result = " + result);
+            return new CommonResult("9487", "預設回傳", body);
+        } catch (JsonProcessingException e) {
+            return "不預期的意外！";
+        }
+
     }
 
-    @ExceptionHandler(value = FruitMarketException.class)
-    public CommonResult handleException(FruitMarketException e) {
-        return CommonResult.fail(e);
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<String> handleException(FruitMarketException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 }
