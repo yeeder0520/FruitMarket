@@ -1,11 +1,10 @@
 package com.demo.fruitmarket.controller;
 
+import com.demo.fruitmarket.controller.requestCmd.PutIntoShoppingCartCommand;
 import com.demo.fruitmarket.entity.Fruit;
 import com.demo.fruitmarket.service.FruitMarketService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,7 +19,7 @@ public class FruitMarketController {
     }
 
     @GetMapping(value = "/ping")
-    public String ping(){
+    public String ping() {
         return "pong";
     }
 
@@ -28,8 +27,13 @@ public class FruitMarketController {
      * 列出所有賣的水果跟單價
      */
     @GetMapping(value = "/getAllFruitAndPrice")
-    public ResponseEntity<List<Fruit>> getAllFruitAndPrice(){
+    public ResponseEntity<List<Fruit>> getAllFruitAndPrice() {
         return ResponseEntity.ok(fruitMarketService.getAllFruitAndPrice());
     }
 
+    @GetMapping(value = "/putIntoShoppingCart")
+    public ResponseEntity<Void> putIntoShoppingCart(@RequestBody PutIntoShoppingCartCommand command) {
+        fruitMarketService.putIntoShoppingCart(command);
+        return ResponseEntity.ok().build();
+    }
 }
