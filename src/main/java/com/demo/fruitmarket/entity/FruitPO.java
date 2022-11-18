@@ -2,16 +2,22 @@ package com.demo.fruitmarket.entity;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
+
+/**
+ * 水果 PO
+ *
+ * @author YeeDer
+ * @version 1.0.0
+ * @since 2022/11/18 下午 05:29
+ **/
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Fruit {
+@Table(name = "Fruit")
+public class FruitPO {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
