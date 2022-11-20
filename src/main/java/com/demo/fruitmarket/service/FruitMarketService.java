@@ -90,6 +90,6 @@ public class FruitMarketService {
     private FruitPO checkFruitItemExist(String fruitName) throws FruitMarketException {
         return fruitMarketRepo
                 .findByName(fruitName)
-                .orElseThrow(() -> new FruitMarketException("500", "", "這個水果沒有賣唷"));
+                .orElseThrow(() -> new FruitMarketException("500", "這個水果沒有賣唷", ""));
     }
 }

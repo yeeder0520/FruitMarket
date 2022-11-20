@@ -1,7 +1,5 @@
 package com.demo.fruitmarket.config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -9,19 +7,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.BindException;
+
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 統一回傳格式.
- * 2021/4/23 下午 03:15
  *
  * @author YeeDer
  * @version 1.0.0
  * @since 2022/11/18 下午 05:29
  **/
-@ControllerAdvice
+@ControllerAdvice(annotations = RestController.class)
 public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
 
     @Override
@@ -29,7 +35,9 @@ public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
             final MethodParameter methodParameter,
             final Class<? extends HttpMessageConverter<?>> aClass
     ) {
-        return true;
+        //回傳資料型態為CommonResult才攔截
+//        return methodParameter.getParameterType().isAssignableFrom(CommonResult.class);
+        return false;
     }
 
     /**
@@ -50,21 +58,37 @@ public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
             final ServerHttpRequest serverHttpRequest,
             final ServerHttpResponse serverHttpResponse
     ) {
-        System.out.println("body = " + body + ", methodParameter = " + methodParameter + ", mediaType = " + mediaType + ", aClass = " + aClass + ", serverHttpRequest = " + serverHttpRequest + ", serverHttpResponse = " + serverHttpResponse);
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            //TODO 整理一下回傳代碼
-            String result = objectMapper.writeValueAsString(body);
-            System.out.println("result = " + result);
-            return new CommonResult("9487", "預設回傳", body);
-        } catch (JsonProcessingException e) {
-            return "不預期的意外！";
+        if (body instanceof CommonResult) {
+            return body;
         }
-
+        return CommonResult.success(body);
     }
 
-    @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<String> handleException(FruitMarketException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    /**
+     * 處理水果市場的異常
+     *
+     * @param e FruitMarketException
+     * @return CommonResult
+     */
+    @ExceptionHandler(FruitMarketException.class)
+    public CommonResult<FruitMarketException> fruitMarketExceptionHandle(FruitMarketException e) {
+        CommonResult<FruitMarketException> commonResult = new CommonResult<>();
+        commonResult.setStatusCode(e.getCode());
+        commonResult.setMessage(e.getMessage());
+        return commonResult;
+    }
+
+    /**
+     * 處理 Validation
+     *
+     * @param exception BindException
+     * @return CommonResult
+     */
+    @ExceptionHandler(BindException.class)
+    public CommonResult<BindException> validationExceptionsHandle(final BindException exception) {
+        CommonResult<BindException> commonResult = new CommonResult<>();
+        commonResult.setStatusCode(HttpStatus.BAD_REQUEST.toString());
+        commonResult.setMessage(exception.getAllErrors().get(0).getDefaultMessage());
+        return commonResult;
     }
 }

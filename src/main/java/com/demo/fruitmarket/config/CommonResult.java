@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 
 /**
  * ResponseEntity 定義層
@@ -16,12 +15,26 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommonResult implements Serializable {
-    private static final Long serialVersionUid = 1L;
+public class CommonResult<T> {
     private String statusCode;
     private String message;
-    private Object body;
+    private T data;
 
+
+    /**
+     * 產生成功
+     *
+     * @param data data
+     * @param <T>  <T>
+     * @return CommonResult
+     */
+    public static <T> CommonResult<T> success(T data) {
+        CommonResult<T> commonResult = new CommonResult<>();
+        commonResult.statusCode = "200";
+        commonResult.message = "成功~~  ";
+        commonResult.data = data;
+        return commonResult;
+    }
 
     /**
      * 產生錯誤.
@@ -29,10 +42,10 @@ public class CommonResult implements Serializable {
      * @param exception FruitMarketException
      * @return CommonResult
      */
-    public static CommonResult fail(
+    public static <T> CommonResult<T> fail(
             final FruitMarketException exception
     ) {
-        CommonResult commonResult = new CommonResult();
+        CommonResult<T> commonResult = new CommonResult<>();
         commonResult.setStatusCode(exception.getCode());
         commonResult.setMessage(exception.getMessage());
         return commonResult;

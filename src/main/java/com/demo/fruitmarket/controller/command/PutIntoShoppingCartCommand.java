@@ -1,7 +1,11 @@
 package com.demo.fruitmarket.controller.command;
 
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -15,10 +19,14 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PutIntoShoppingCartCommand {
-    @NotNull(message = "用戶名稱不得為空")
+
+    @NotBlank(message = "用戶名稱一定要帶")
     private String consumerName;
-    @NotNull(message = "水果名稱不得為空")
+
+    @NotBlank(message = "水果名稱一定要帶")
     private String fruitName;
-    @NotNull(message = "購買數量不得為空")
+
+    @NotNull(message = "購買數量一定要帶")
+    @Min(message = "購買數量至少一個", value = 1)
     private int quantity;
 }

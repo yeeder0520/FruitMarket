@@ -1,15 +1,14 @@
 package com.demo.fruitmarket.controller;
 
+import com.demo.fruitmarket.config.CommonResult;
 import com.demo.fruitmarket.config.FruitMarketException;
 import com.demo.fruitmarket.controller.command.PutIntoShoppingCartCommand;
 import com.demo.fruitmarket.controller.representation.GetAllFruitAndPriceRepresentation;
-import com.demo.fruitmarket.entity.FruitPO;
 import com.demo.fruitmarket.service.FruitMarketService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.validation.Valid;
 import java.util.Set;
 
 /**
@@ -35,8 +34,8 @@ public class FruitMarketController {
      * @return ResponseEntity
      */
     @GetMapping(value = "/getAllFruitAndPrice")
-    public ResponseEntity<Set<GetAllFruitAndPriceRepresentation>> getAllFruitAndPrice() {
-        return ResponseEntity.ok(fruitMarketService.getAllFruitAndPrice());
+    public CommonResult<Set<GetAllFruitAndPriceRepresentation>> getAllFruitAndPrice() {
+        return CommonResult.success(fruitMarketService.getAllFruitAndPrice());
     }
 
     /**
@@ -46,10 +45,9 @@ public class FruitMarketController {
      * @return ResponseEntity
      */
     @GetMapping(value = "/putIntoShoppingCart")
-    public ResponseEntity<String> putIntoShoppingCart(
-            @Validated @RequestBody PutIntoShoppingCartCommand command
+    public void putIntoShoppingCart(
+            @Valid @RequestBody PutIntoShoppingCartCommand command
     ) throws FruitMarketException {
         fruitMarketService.putIntoShoppingCart(command);
-        return ResponseEntity.ok().build();
     }
 }
