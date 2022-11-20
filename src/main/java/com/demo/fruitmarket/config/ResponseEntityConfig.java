@@ -9,18 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.BindException;
 
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 統一回傳格式.
@@ -39,7 +34,6 @@ public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
     ) {
         //回傳資料型態為CommonResult才攔截
         return methodParameter.getParameterType().isAssignableFrom(CommonResult.class);
-//        return false;
     }
 
     /**
@@ -63,7 +57,7 @@ public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
         if (body instanceof CommonResult) {
             return body;
         }
-        if(body instanceof String) {
+        if (body instanceof String) {
             ObjectMapper objectMapper = new ObjectMapper();
             try {
                 return objectMapper.writeValueAsString(body);
@@ -81,24 +75,21 @@ public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
      * @return CommonResult
      */
     @ExceptionHandler(FruitMarketException.class)
-    public CommonResult<FruitMarketException> fruitMarketExceptionHandle(FruitMarketException e) {
-        CommonResult<FruitMarketException> commonResult = new CommonResult<>();
-        commonResult.setStatusCode(e.getCode());
-        commonResult.setMessage(e.getMessage());
-        return commonResult;
+    public ResponseEntity<CommonResult<FruitMarketException>> fruitMarketExceptionHandle(FruitMarketException e) {
+        return ResponseEntity.badRequest().body(CommonResult.fail(e));
     }
 
     /**
      * 處理 Validation
      *
-     * @param exception BindException
+     * @param bindException BindException
      * @return CommonResult
      */
     @ExceptionHandler(BindException.class)
-    public CommonResult<BindException> validationExceptionsHandle(final BindException exception) {
+    public ResponseEntity<CommonResult<BindException>> validationExceptionsHandle(final BindException bindException) {
         CommonResult<BindException> commonResult = new CommonResult<>();
         commonResult.setStatusCode(HttpStatus.BAD_REQUEST.toString());
-        commonResult.setMessage(exception.getAllErrors().get(0).getDefaultMessage());
-        return commonResult;
+        commonResult.setMessage(bindException.getAllErrors().get(0).getDefaultMessage());
+        return ResponseEntity.badRequest().body(commonResult);
     }
 }
