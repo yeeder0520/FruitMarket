@@ -1,5 +1,7 @@
 package com.demo.fruitmarket.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -36,8 +38,8 @@ public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
             final Class<? extends HttpMessageConverter<?>> aClass
     ) {
         //回傳資料型態為CommonResult才攔截
-//        return methodParameter.getParameterType().isAssignableFrom(CommonResult.class);
-        return false;
+        return methodParameter.getParameterType().isAssignableFrom(CommonResult.class);
+//        return false;
     }
 
     /**
@@ -60,6 +62,14 @@ public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
     ) {
         if (body instanceof CommonResult) {
             return body;
+        }
+        if(body instanceof String) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                return objectMapper.writeValueAsString(body);
+            } catch (JsonProcessingException e) {
+                return "不預期意外";
+            }
         }
         return CommonResult.success(body);
     }

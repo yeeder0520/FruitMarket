@@ -45,9 +45,10 @@ public class FruitMarketController {
      * @return ResponseEntity
      */
     @GetMapping(value = "/putIntoShoppingCart")
-    public void putIntoShoppingCart(
+    public CommonResult<Void> putIntoShoppingCart(
             @Valid @RequestBody PutIntoShoppingCartCommand command
     ) throws FruitMarketException {
         fruitMarketService.putIntoShoppingCart(command);
+        return CommonResult.success();
     }
 }

@@ -24,6 +24,19 @@ public class CommonResult<T> {
     /**
      * 產生成功
      *
+     * @param <T>  <T>
+     * @return CommonResult
+     */
+    public static <T> CommonResult<T> success() {
+        CommonResult<T> commonResult = new CommonResult<>();
+        commonResult.statusCode = "200";
+        commonResult.message = "void成功~~";
+        return commonResult;
+    }
+
+    /**
+     * 產生成功
+     *
      * @param data data
      * @param <T>  <T>
      * @return CommonResult
