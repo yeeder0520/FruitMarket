@@ -56,9 +56,6 @@ public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
             final ServerHttpResponse serverHttpResponse
     ) {
         if (body instanceof CommonResult) {
-            System.out.println("111");
-            System.out.println("((CommonResult<?>) body).getMessage() = " + ((CommonResult<?>) body).getMessage());
-            System.out.println("((CommonResult<?>) body).getData() = " + ((CommonResult<?>) body).getData());
             return body;
         }
         if (body instanceof ResponseEntity){

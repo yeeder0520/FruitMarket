@@ -5,3 +5,4 @@ INSERT INTO Fruit (name,price) VALUES ('grape',40);
 
 INSERT INTO USERS (id,username,secret) VALUES ('001','smallcc9837','111111');
 INSERT INTO USERS (id,username,secret) VALUES ('002','yeeder9837','111111');
+INSERT INTO USERS (id,username,secret) VALUES ('003','justin9837','123456');
