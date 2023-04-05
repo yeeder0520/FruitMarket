@@ -25,9 +25,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with userId: " + userId));
 
         return User.builder()
-                .username(usersPO.getUsername())
-                .password(passwordEncoder.encode(usersPO.getSecret()))
-                .authorities("ADMIN")
+                .username(usersPO.getUsername()) //使用者帳號
+                .password(passwordEncoder.encode(usersPO.getSecret())) //使用者密碼
+                .authorities("ADMIN") // 使用者權限 這邊應該要去資料查出來 塞進去
                 .build();
     }
 }
