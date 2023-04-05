@@ -33,7 +33,8 @@ public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
             final Class<? extends HttpMessageConverter<?>> aClass
     ) {
         //回傳資料型態為CommonResult才攔截
-        return methodParameter.getParameterType().isAssignableFrom(CommonResult.class);
+//        return methodParameter.getParameterType().isAssignableFrom(CommonResult.class);
+        return true;
     }
 
     /**
@@ -55,9 +56,18 @@ public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
             final ServerHttpResponse serverHttpResponse
     ) {
         if (body instanceof CommonResult) {
+            System.out.println("111");
+            System.out.println("((CommonResult<?>) body).getMessage() = " + ((CommonResult<?>) body).getMessage());
+            System.out.println("((CommonResult<?>) body).getData() = " + ((CommonResult<?>) body).getData());
             return body;
         }
+        if (body instanceof ResponseEntity){
+            System.out.println("222");
+            return "出示啦叭北";
+        }
+
         if (body instanceof String) {
+            System.out.println("333");
             ObjectMapper objectMapper = new ObjectMapper();
             try {
                 return objectMapper.writeValueAsString(body);

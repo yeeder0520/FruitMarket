@@ -4,7 +4,7 @@ spring:
   h2:
     console:
       enabled: true
-      path: '/h2'
+      path: '/h2' #http://localhost:8877/h2/
   jpa:
      defer-datasource-initialization: true
 #    generate-ddl: false

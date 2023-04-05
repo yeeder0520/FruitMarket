@@ -51,4 +51,5 @@ public class FruitMarketController {
         fruitMarketService.putIntoShoppingCart(command);
         return ResponseEntity.ok(CommonResult.success());
     }
+
 }
