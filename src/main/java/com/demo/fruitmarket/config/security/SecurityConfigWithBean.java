@@ -22,6 +22,7 @@ public class SecurityConfigWithBean {
                         .anyRequest().authenticated()
                 )
                 .httpBasic(withDefaults());
+//        http.addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class); //這邊要自己實作 JwtFilter 才可以
 
         return http.build();
     }
