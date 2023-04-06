@@ -2,25 +2,27 @@ package com.demo.fruitmarket.config.security;
 
 import com.demo.fruitmarket.entity.UsersPO;
 import com.demo.fruitmarket.repository.UsersRepo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-public class UserDetailsServiceImpl implements UserDetailsService {
+@Component
+public class MyUserDetailsService implements UserDetailsService {
 
-    @Autowired
-    UsersRepo usersRepo;
+    private final UsersRepo usersRepo;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    public MyUserDetailsService(UsersRepo usersRepo, PasswordEncoder passwordEncoder) {
+        this.usersRepo = usersRepo;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        System.out.println("Start loadUserByUsername userId = " + userId);
         UsersPO usersPO = usersRepo.findByUsername(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with userId: " + userId));
 
@@ -30,4 +32,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .authorities("ADMIN") // 使用者權限 這邊應該要去資料查出來 塞進去
                 .build();
     }
+
+
 }
