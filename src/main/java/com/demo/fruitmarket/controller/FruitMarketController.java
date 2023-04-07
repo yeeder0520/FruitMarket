@@ -6,6 +6,7 @@ import com.demo.fruitmarket.controller.command.PutIntoShoppingCartCommand;
 import com.demo.fruitmarket.controller.representation.GetAllFruitAndPriceRepresentation;
 import com.demo.fruitmarket.service.FruitMarketService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;

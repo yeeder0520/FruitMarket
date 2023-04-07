@@ -1,23 +1,34 @@
 package com.demo.fruitmarket.config.security;
 
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-public class User implements UserDetails {
+public class MyUser implements UserDetails {
 
-    private final String account;
-    private final String secret;
+    @JsonProperty("account")
+    private String account;
 
-    public User(String account, String secret) {
+    @JsonProperty("secret")
+    private String secret;
+
+    private Collection<? extends GrantedAuthority> authorities;
+
+    public MyUser() {
+    } // 添加一个无参构造函数
+
+    public MyUser(String account, String secret, Collection<? extends GrantedAuthority> authorities) {
         this.account = account;
         this.secret = secret;
+        this.authorities = authorities;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return authorities;
     }
 
     @Override

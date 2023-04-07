@@ -29,11 +29,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authz) -> authz
                         .antMatchers("/users/*", "/fruitMarket/*").hasAuthority("ADMIN")
                         .antMatchers("/login", "/h2/*").permitAll()
-                        .anyRequest().authenticated()
+//                        .anyRequest().authenticated()
                 )
                 .csrf().disable()
                 /*配置登入驗證*/
 //                .userDetailsService(userDetailsService)
+                /*驗證Token*/
+                .addFilterBefore(new MyJwtFilter(),UsernamePasswordAuthenticationFilter.class)
                 /*驗證之前的Filter，這邊要自己實作 JwtFilter 才可以*/
                 .addFilterBefore(new AuthenticationFilter("/login", authenticationManager), UsernamePasswordAuthenticationFilter.class)
                 /*讓 Spring Security 在驗證後不會在創建 Session*/

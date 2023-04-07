@@ -1,5 +1,9 @@
 package com.demo.fruitmarket.config.security;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -8,8 +12,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -43,12 +49,26 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
      */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
-        String token = request.getHeader("Authorization");
-        String username = request.getParameter("username");
 
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ADMIN"));
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, token, authorities);
+        System.out.println("Start attemptAuthentication");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+
+        UserDetails user = objectMapper.readValue(request.getInputStream(), MyUser.class);
+
+        System.out.println(user.getUsername() + user.getPassword());
+
+        String username = user.getUsername();
+        username = HtmlUtils.htmlEscape(username);
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                username,
+                user.getPassword(),
+                user.getAuthorities()
+        );
+
         return getAuthenticationManager().authenticate(authenticationToken);
     }
 
@@ -73,8 +93,8 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
         // 将JWT token添加到HTTP响应中
         response.addHeader("Authorization", "Bearer " + token);
         response.setStatus(HttpServletResponse.SC_OK);
-        SecurityContextHolder.getContext().setAuthentication(authResult);
         response.getWriter().write("aaaaaaa");
+
     }
 
     /**
@@ -84,10 +104,9 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
      * @param response response
      * @param failed   failed
      * @throws IOException      IOException
-     * @throws ServletException ServletException
      */
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
         System.out.println("unsuccessfulAuthentication");
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.getWriter().write(failed.getMessage());
