@@ -1,4 +1,4 @@
-package com.demo.fruitmarket.controller.representation;
+package com.demo.fruitmarket.controller.responseCommand;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

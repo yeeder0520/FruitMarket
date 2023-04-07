@@ -2,11 +2,10 @@ package com.demo.fruitmarket.controller;
 
 import com.demo.fruitmarket.config.CommonResult;
 import com.demo.fruitmarket.config.FruitMarketException;
-import com.demo.fruitmarket.controller.command.PutIntoShoppingCartCommand;
-import com.demo.fruitmarket.controller.representation.GetAllFruitAndPriceRepresentation;
+import com.demo.fruitmarket.controller.requestCommand.PutIntoShoppingCartCommand;
+import com.demo.fruitmarket.controller.responseCommand.GetAllFruitAndPriceRepresentation;
 import com.demo.fruitmarket.service.FruitMarketService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;

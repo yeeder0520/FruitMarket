@@ -1,5 +1,6 @@
 package com.demo.fruitmarket.config.security;
 
+import com.demo.fruitmarket.repository.UsersRepo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -17,27 +18,25 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final MyAuthenticationManager authenticationManager;
+    private final UsersRepo usersRepo;
 
-    public SecurityConfig(MyAuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
+    public SecurityConfig(UsersRepo usersRepo) {
+        this.usersRepo = usersRepo;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authz) -> authz
-                        .antMatchers("/users/*", "/fruitMarket/*").hasAuthority("ADMIN")
-                        .antMatchers("/login", "/h2/*").permitAll()
+                                .antMatchers("/users/*", "/fruitMarket/*").hasAuthority("ADMIN")
+                                .antMatchers("/login", "/h2/*").permitAll()
 //                        .anyRequest().authenticated()
                 )
                 .csrf().disable()
-                /*配置登入驗證*/
-//                .userDetailsService(userDetailsService)
                 /*驗證Token*/
-                .addFilterBefore(new MyJwtFilter(),UsernamePasswordAuthenticationFilter.class)
-                /*驗證之前的Filter，這邊要自己實作 JwtFilter 才可以*/
-                .addFilterBefore(new AuthenticationFilter("/login", authenticationManager), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new MyJwtFilter(), UsernamePasswordAuthenticationFilter.class)
+                /*驗證帳號密碼，發Token*/
+                .addFilterBefore(new AuthenticationFilter("/login", passwordEncoder(), usersRepo), UsernamePasswordAuthenticationFilter.class)
                 /*讓 Spring Security 在驗證後不會在創建 Session*/
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 /* 會跳出登入畫面 */
@@ -47,9 +46,10 @@ public class SecurityConfig {
         return http.build();
     }
 
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+
 }

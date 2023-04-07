@@ -1,8 +1,8 @@
 package com.demo.fruitmarket.service;
 
 import com.demo.fruitmarket.config.FruitMarketException;
-import com.demo.fruitmarket.controller.command.PutIntoShoppingCartCommand;
-import com.demo.fruitmarket.controller.representation.GetAllFruitAndPriceRepresentation;
+import com.demo.fruitmarket.controller.requestCommand.PutIntoShoppingCartCommand;
+import com.demo.fruitmarket.controller.responseCommand.GetAllFruitAndPriceRepresentation;
 import com.demo.fruitmarket.domain.FruitDto;
 import com.demo.fruitmarket.domain.ShoppingCartDto;
 import com.demo.fruitmarket.entity.FruitPO;

@@ -6,24 +6,20 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class MyAuthenticationManager implements AuthenticationManager {
 
-    private final MyUserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
+    private final UsersRepo usersRepo;
 
-    public MyAuthenticationManager(MyUserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
+    public MyAuthenticationManager( PasswordEncoder passwordEncoder, UsersRepo usersRepo) {
+        this.passwordEncoder = passwordEncoder;
+        this.usersRepo = usersRepo;
     }
 
     @Override
@@ -32,14 +28,19 @@ public class MyAuthenticationManager implements AuthenticationManager {
         System.out.println("Start authenticate = " + authentication);
         String username = authentication.getName();
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        UsersPO usersPO = usersRepo.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with userId: " + username));
 
-        if (!userDetails.getPassword().equals(authentication.getCredentials())) {
-            System.out.println("密碼錯誤");
+        /*驗證密碼正確性
+        參數1:使用者代帶入密碼
+        參數2:DB密碼 (加密過) */
+        boolean matches = passwordEncoder.matches(authentication.getCredentials().toString(), usersPO.getSecret());
+
+
+        if (!matches) {
             throw new BadCredentialsException("Incorrect password");
         }
-        // 將 authentication 存入 ThreadLocal，方便後續取得用戶訊息
-        authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
+
         // 驗證通過，返回一個已驗證的身份信息對象
         return authentication;
     }

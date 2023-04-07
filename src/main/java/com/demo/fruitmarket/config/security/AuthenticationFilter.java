@@ -1,40 +1,43 @@
 package com.demo.fruitmarket.config.security;
 
+import com.demo.fruitmarket.entity.UsersPO;
+import com.demo.fruitmarket.repository.UsersRepo;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+
+    private final PasswordEncoder passwordEncoder;
+    private final UsersRepo usersRepo;
 
     /**
      * 初始化建構子
      *
      * @param defaultFilterProcessesUrl 登入的URL
+     * @param passwordEncoder           passwordEncoder
+     * @param usersRepo                 usersRepo
      */
-    public AuthenticationFilter(String defaultFilterProcessesUrl, AuthenticationManager authenticationManager) {
+    public AuthenticationFilter(String defaultFilterProcessesUrl, PasswordEncoder passwordEncoder, UsersRepo usersRepo) {
         super(new AntPathRequestMatcher(defaultFilterProcessesUrl));
-        setAuthenticationManager(authenticationManager);
+        this.passwordEncoder = passwordEncoder;
+        this.usersRepo = usersRepo;
     }
 
     /**
@@ -57,19 +60,25 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
-        UserDetails user = objectMapper.readValue(request.getInputStream(), MyUser.class);
-
-        System.out.println(user.getUsername() + user.getPassword());
-
+        MyUser user = objectMapper.readValue(request.getInputStream(), MyUser.class);
         String username = user.getUsername();
-        username = HtmlUtils.htmlEscape(username);
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+
+        UsersPO usersPO = usersRepo.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with userId: " + username));
+
+        /*驗證密碼正確性
+        參數1:使用者代帶入密碼
+        參數2:DB密碼 (加密過) */
+        boolean isPwdMatches = passwordEncoder.matches(user.getPassword(), usersPO.getSecret());
+        if (!isPwdMatches) {
+            throw new BadCredentialsException("Incorrect password");
+        }
+
+        return new UsernamePasswordAuthenticationToken(
                 username,
-                user.getPassword(),
+                null,
                 user.getAuthorities()
         );
-
-        return getAuthenticationManager().authenticate(authenticationToken);
     }
 
     /**
@@ -93,7 +102,7 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
         // 将JWT token添加到HTTP响应中
         response.addHeader("Authorization", "Bearer " + token);
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write("aaaaaaa");
+        response.getWriter().write(authResult.toString());
 
     }
 
@@ -103,7 +112,7 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
      * @param request  request
      * @param response response
      * @param failed   failed
-     * @throws IOException      IOException
+     * @throws IOException IOException
      */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {

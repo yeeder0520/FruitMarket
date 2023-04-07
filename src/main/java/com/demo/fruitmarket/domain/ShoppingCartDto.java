@@ -1,6 +1,6 @@
 package com.demo.fruitmarket.domain;
 
-import com.demo.fruitmarket.controller.command.PutIntoShoppingCartCommand;
+import com.demo.fruitmarket.controller.requestCommand.PutIntoShoppingCartCommand;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

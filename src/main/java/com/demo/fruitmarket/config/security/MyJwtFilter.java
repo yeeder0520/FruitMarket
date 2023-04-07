@@ -23,19 +23,13 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 public class MyJwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         System.out.println("Start MyJwtFilter doFilterInternal");
-
         String authorizationHeader = request.getHeader(AUTHORIZATION);
-
-        System.out.println("authorizationHeader = " + authorizationHeader);
-
         if ("ABC".equals(authorizationHeader)) {
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority("ADMIN"));
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken("username", null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            filterChain.doFilter(request, response);
         }
         filterChain.doFilter(request, response);
     }
