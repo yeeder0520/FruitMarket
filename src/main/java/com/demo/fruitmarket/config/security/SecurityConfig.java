@@ -36,7 +36,7 @@ public class SecurityConfig {
                 /*驗證Token*/
                 .addFilterBefore(new MyJwtFilter(), UsernamePasswordAuthenticationFilter.class)
                 /*驗證帳號密碼，發Token*/
-                .addFilterBefore(new AuthenticationFilter("/login", passwordEncoder(), usersRepo), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new MyAuthenticationFilter("/login", myAuthenticationManager()), UsernamePasswordAuthenticationFilter.class)
                 /*讓 Spring Security 在驗證後不會在創建 Session*/
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 /* 會跳出登入畫面 */
@@ -49,6 +49,16 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public MyUserDetailsService myUserDetailsService() {
+        return new MyUserDetailsService(usersRepo);
+    }
+
+    @Bean
+    public MyAuthenticationManager myAuthenticationManager() {
+        return new MyAuthenticationManager(myUserDetailsService(), passwordEncoder());
     }
 
 

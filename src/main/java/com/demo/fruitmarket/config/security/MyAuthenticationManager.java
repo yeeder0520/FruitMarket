@@ -1,25 +1,20 @@
 package com.demo.fruitmarket.config.security;
 
-import com.demo.fruitmarket.entity.UsersPO;
-import com.demo.fruitmarket.repository.UsersRepo;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
-@Component
 public class MyAuthenticationManager implements AuthenticationManager {
 
+    private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
-    private final UsersRepo usersRepo;
 
-    public MyAuthenticationManager( PasswordEncoder passwordEncoder, UsersRepo usersRepo) {
+    public MyAuthenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
-        this.usersRepo = usersRepo;
     }
 
     @Override
@@ -28,14 +23,12 @@ public class MyAuthenticationManager implements AuthenticationManager {
         System.out.println("Start authenticate = " + authentication);
         String username = authentication.getName();
 
-        UsersPO usersPO = usersRepo.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with userId: " + username));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         /*驗證密碼正確性
         參數1:使用者代帶入密碼
         參數2:DB密碼 (加密過) */
-        boolean matches = passwordEncoder.matches(authentication.getCredentials().toString(), usersPO.getSecret());
-
+        boolean matches = passwordEncoder.matches(authentication.getCredentials().toString(), userDetails.getPassword());
 
         if (!matches) {
             throw new BadCredentialsException("Incorrect password");

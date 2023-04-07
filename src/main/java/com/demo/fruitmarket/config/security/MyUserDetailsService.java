@@ -9,12 +9,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
 public class MyUserDetailsService implements UserDetailsService {
 
     private final UsersRepo usersRepo;
@@ -33,7 +31,11 @@ public class MyUserDetailsService implements UserDetailsService {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ADMIN"));
 
-        return new MyUser(usersPO.getUsername(), usersPO.getSecret(), authorities);
+        return User.builder()
+                .username(usersPO.getUsername())
+                .password(usersPO.getSecret())
+                .authorities(authorities)
+                .build();
     }
 
 
