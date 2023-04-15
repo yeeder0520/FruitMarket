@@ -9,9 +9,14 @@ import com.demo.fruitmarket.entity.FruitPO;
 import com.demo.fruitmarket.entity.ShoppingCartPO;
 import com.demo.fruitmarket.repository.FruitMarketRepo;
 import com.demo.fruitmarket.repository.ShoppingRepo;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -26,10 +31,12 @@ public class FruitMarketService {
 
     private final FruitMarketRepo fruitMarketRepo;
     private final ShoppingRepo shoppingRepo;
+    private final CacheManager cacheManager;
 
-    public FruitMarketService(FruitMarketRepo fruitMarketRepo, ShoppingRepo shoppingRepo) {
+    public FruitMarketService(FruitMarketRepo fruitMarketRepo, ShoppingRepo shoppingRepo, CacheManager cacheManager) {
         this.fruitMarketRepo = fruitMarketRepo;
         this.shoppingRepo = shoppingRepo;
+        this.cacheManager = cacheManager;
     }
 
     /**
@@ -40,8 +47,8 @@ public class FruitMarketService {
     public Set<GetAllFruitAndPriceRepresentation> getAllFruitAndPrice() {
 
         return fruitMarketRepo.findAll().stream().map(
-                fruitPO ->
-                        new GetAllFruitAndPriceRepresentation(fruitPO.getName(), fruitPO.getPrice()))
+                        fruitPO ->
+                                new GetAllFruitAndPriceRepresentation(fruitPO.getName(), fruitPO.getPrice()))
                 .collect(Collectors.toSet());
     }
 
@@ -91,5 +98,47 @@ public class FruitMarketService {
         return fruitMarketRepo
                 .findByName(fruitName)
                 .orElseThrow(() -> new FruitMarketException("500", "這個水果沒有賣唷", ""));
+    }
+
+    /**
+     * 購買水果
+     *
+     * @param buyCount 購買數量
+     * @return 購買結果
+     */
+    public String buyFruit(int buyCount) {
+
+        cacheManager.getCacheNames().forEach(cacheManager -> System.out.println("cacheManager = " + cacheManager));
+
+        Cache applePool = cacheManager.getCache("ApplePool");
+        applePool.put("AppleCount", 10);
+
+
+        int ticket = getTicket();
+        System.out.println(ticket);
+        setTicketCount(buyCount);
+        return "購買成功";
+    }
+
+    private int appleCount = 10;
+
+    @Cacheable(cacheNames = "ApplePool")
+    public int getTicket() {
+        return appleCount;
+    }
+
+    @CachePut(value = "ApplePool")
+    public void setTicketCount(int count) {
+        if (appleCount <= 0) {
+            System.out.println("票沒了");
+            appleCount += 10;
+        } else if (appleCount <= count) {
+            System.out.println("票不夠了");
+            appleCount += 10;
+        } else {
+            System.out.println("票還夠");
+
+            appleCount -= count;
+        }
     }
 }

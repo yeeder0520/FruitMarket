@@ -52,4 +52,9 @@ public class FruitMarketController {
         return ResponseEntity.ok(CommonResult.success());
     }
 
+
+    @GetMapping("/buyFruit/{buyCount}")
+    public String buyFruit(@PathVariable int buyCount) {
+        return fruitMarketService.buyFruit(buyCount);
+    }
 }
