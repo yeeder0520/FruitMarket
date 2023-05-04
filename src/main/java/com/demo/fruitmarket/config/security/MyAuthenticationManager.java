@@ -31,7 +31,7 @@ public class MyAuthenticationManager implements AuthenticationManager {
         boolean matches = passwordEncoder.matches(authentication.getCredentials().toString(), userDetails.getPassword());
 
         if (!matches) {
-            throw new BadCredentialsException("Incorrect password");
+            throw new BadCredentialsException("密碼錯誤啦");
         }
 
         // 驗證通過，返回一個已驗證的身份信息對象
