@@ -87,7 +87,7 @@ public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
     }
 
     /**
-     * 處理 Validation
+     * 處理 @Valid
      *
      * @param bindException BindException
      * @return CommonResult
@@ -98,5 +98,30 @@ public class ResponseEntityConfig implements ResponseBodyAdvice<Object> {
         commonResult.setStatusCode(HttpStatus.BAD_REQUEST.toString());
         commonResult.setMessage(bindException.getAllErrors().get(0).getDefaultMessage());
         return ResponseEntity.badRequest().body(commonResult);
+    }
+
+    /**
+     * 處理 @Validated
+     *
+     * @param ex MethodArgumentNotValidException
+     * @return CommonResult
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handleValidationException(MethodArgumentNotValidException ex) {
+        BindingResult bindingResult = ex.getBindingResult();
+        
+        // Get validation errors and handle them appropriately
+        List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+        
+        StringBuilder errorMessage = new StringBuilder("Validation error(s): ");
+        for (FieldError error : fieldErrors) {
+            errorMessage.append(error.getField())
+                        .append(" - ")
+                        .append(error.getDefaultMessage())
+                        .append("; ");
+        }
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(errorMessage.toString());
     }
 }
